@@ -25,6 +25,39 @@ version must be the same as what OpenVSP was compiled with. For instance OpenVSP
 version of Python is desired, the user must compile OpenVSP themselves.
 
 
+MCP Server
+----------
+OpenVSP ships with an `Model Context Protocol (MCP)`_ server that exposes the full API to AI assistants
+such as Claude. The server is installed as part of the ``openvsp`` Python package and can be started from
+the command line once the OpenVSP Python bindings are available:
+
+.. code-block:: bash
+
+    # stdio transport — for use with Claude Desktop, MCP clients, etc.
+    python -m openvsp.mcp_server
+
+    # SSE transport — HTTP server on a custom port
+    python -m openvsp.mcp_server --sse --port 9000
+
+The server exposes tools for:
+
+- Loading and saving ``.vsp3`` model files
+- Creating, querying, and deleting geometry components
+- Reading and writing geometry parameters
+- Running analyses (CompGeom, MassProps, VSPAEROSweep, etc.) and retrieving results
+- Exporting models to STL, OBJ, STEP, IGES, DXF, GMSH, PLOT3D, Cart3D, and other formats
+- Importing geometry from STL, BEM, and legacy OpenVSP v2 files
+- Computing watertight (CompGeom), degenerate (DegenGeom), and CFD surface meshes
+
+The package registers an ``openvsp-mcp`` console script entry point so that the server can also be
+launched as::
+
+    openvsp-mcp              # stdio
+    openvsp-mcp --sse --port 9000
+
+.. _Model Context Protocol (MCP): https://modelcontextprotocol.io/
+
+
 Improvements
 ============
 
