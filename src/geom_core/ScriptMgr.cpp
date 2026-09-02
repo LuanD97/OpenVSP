@@ -3300,6 +3300,24 @@ void ScriptMgrSingleton::RegisterAdvLinkMgr( asIScriptEngine* se )
     r = se->RegisterGlobalFunction( "void AcceptGeomScale( const string & in geom_id )", asFUNCTION( vsp::AcceptGeomScale ), asCALL_CDECL );
     assert( r >= 0 );
 
+    r = se->RegisterGlobalFunction( "void ResetFitModel()", asFUNCTION( vsp::ResetFitModel ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "void ClearFitModelVars()", asFUNCTION( vsp::ClearFitModelVars ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "void ClearFitModelTargetPts()", asFUNCTION( vsp::ClearFitModelTargetPts ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "bool AddFitModelVar( const string & in parm_id )", asFUNCTION( vsp::AddFitModelVar ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "int GetNumFitModelVars()", asFUNCTION( vsp::GetNumFitModelVars ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "int GetNumFitModelTargetPts()", asFUNCTION( vsp::GetNumFitModelTargetPts ), asCALL_CDECL );
+    assert( r >= 0 );
+
     r = se->RegisterGlobalFunction( "array<vec3d>@+ GetPtCloudPnts( const string & in geom_id )", asMETHOD( ScriptMgrSingleton, GetPtCloudPnts ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );
     assert( r >= 0 );
 

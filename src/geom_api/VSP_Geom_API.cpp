@@ -50,6 +50,7 @@
 #include "WingGeom.h"
 #include "MeshGeom.h"
 #include "PtCloudGeom.h"
+#include "FitModelMgr.h"
 #include "StlHelper.h"
 #include "ModeMgr.h"
 
@@ -13042,6 +13043,55 @@ void AcceptGeomScale( const std::string & geom_id )
     Update();
 
     ErrorMgr.NoError();
+}
+
+void ResetFitModel()
+{
+    FitModelMgr.Renew();
+    ErrorMgr.NoError();
+}
+
+void ClearFitModelVars()
+{
+    FitModelMgr.DelAllVars();
+    ErrorMgr.NoError();
+}
+
+void ClearFitModelTargetPts()
+{
+    FitModelMgr.DelAllTargetPts();
+    ErrorMgr.NoError();
+}
+
+bool AddFitModelVar( const std::string & parm_id )
+{
+    Parm* parm_ptr = ParmMgr.FindParm( parm_id );
+    if ( !parm_ptr )
+    {
+        ErrorMgr.AddError( VSP_INVALID_PTR, "AddFitModelVar::Can't Find Parm " + parm_id );
+        return false;
+    }
+
+    if ( !FitModelMgr.AddVar( parm_id ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "AddFitModelVar::Parm already added " + parm_id );
+        return false;
+    }
+
+    ErrorMgr.NoError();
+    return true;
+}
+
+int GetNumFitModelVars()
+{
+    ErrorMgr.NoError();
+    return FitModelMgr.GetNumVars();
+}
+
+int GetNumFitModelTargetPts()
+{
+    ErrorMgr.NoError();
+    return FitModelMgr.GetNumTargetPt();
 }
 
 std::vector < vec3d > GetPtCloudPnts( const std::string & geom_id )

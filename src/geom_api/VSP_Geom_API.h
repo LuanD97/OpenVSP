@@ -39058,6 +39058,84 @@ extern void AcceptGeomScale( const std::string & geom_id );
     \ingroup Geom
 */
 /*!
+    Reset the Fit Model manager state, clearing all fit variables and target points.
+    \forcpponly
+    \code{.cpp}
+    string pid = AddGeom( "POD" );
+    string parm_id = FindParm( pid, "Length", "Design" );
+
+    AddFitModelVar( parm_id );
+    ResetFitModel();
+
+    if ( GetNumFitModelVars() != 0 )
+    {
+        Print( "ERROR: ResetFitModel did not clear fit variables" );
+        __failure++;
+    }
+    \endcode
+    \endforcpponly
+    \beginPythonOnly
+    \code{.py}
+    pid = AddGeom( "POD" )
+    parm_id = FindParm( pid, "Length", "Design" )
+
+    AddFitModelVar( parm_id )
+    ResetFitModel()
+
+    assert GetNumFitModelVars() == 0, "ResetFitModel did not clear fit variables"
+    \endcode
+    \endPythonOnly
+*/
+extern void ResetFitModel();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Clear all Fit Model variables while leaving target points unchanged.
+*/
+extern void ClearFitModelVars();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Clear all Fit Model target points while leaving variables unchanged.
+*/
+extern void ClearFitModelTargetPts();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Add a Fit Model variable by Parm ID.
+    \param [in] parm_id string Parm ID
+    \return bool True on success
+*/
+extern bool AddFitModelVar( const std::string & parm_id );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get the number of Fit Model variables.
+    \return int Number of Fit Model variables
+*/
+extern int GetNumFitModelVars();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get the number of Fit Model target points.
+    \return int Number of Fit Model target points
+*/
+extern int GetNumFitModelTargetPts();
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the points of a Point Cloud Geom
     \forcpponly
     \code{.cpp}
