@@ -10,3 +10,4 @@ __pycache__/
 CMakeSettings.json
 *.vs
 examples/scripts/python_scripts/*_files/*
+AGENTS.md
