@@ -13082,10 +13082,35 @@ bool AddFitModelVar( const std::string & parm_id )
     return true;
 }
 
+void DeleteFitModelVar( const std::string & parm_id )
+{
+    Parm* parm_ptr = ParmMgr.FindParm( parm_id );
+    if ( !parm_ptr )
+    {
+        ErrorMgr.AddError( VSP_INVALID_PTR, "DeleteFitModelVar::Can't Find Parm " + parm_id );
+        return;
+    }
+
+    if ( !FitModelMgr.CheckForDuplicateVar( parm_id ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "DeleteFitModelVar::Parm not in Fit Model " + parm_id );
+        return;
+    }
+
+    FitModelMgr.DelVar( parm_id );
+    ErrorMgr.NoError();
+}
+
 int GetNumFitModelVars()
 {
     ErrorMgr.NoError();
     return FitModelMgr.GetNumVars();
+}
+
+std::vector< std::string > GetFitModelVarIDs()
+{
+    ErrorMgr.NoError();
+    return FitModelMgr.GetVarVec();
 }
 
 int GetNumFitModelTargetPts()

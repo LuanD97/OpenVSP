@@ -3312,7 +3312,13 @@ void ScriptMgrSingleton::RegisterAdvLinkMgr( asIScriptEngine* se )
     r = se->RegisterGlobalFunction( "bool AddFitModelVar( const string & in parm_id )", asFUNCTION( vsp::AddFitModelVar ), asCALL_CDECL );
     assert( r >= 0 );
 
+    r = se->RegisterGlobalFunction( "void DeleteFitModelVar( const string & in parm_id )", asFUNCTION( vsp::DeleteFitModelVar ), asCALL_CDECL );
+    assert( r >= 0 );
+
     r = se->RegisterGlobalFunction( "int GetNumFitModelVars()", asFUNCTION( vsp::GetNumFitModelVars ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "array<string>@+ GetFitModelVarIDs()", asMETHOD( ScriptMgrSingleton, GetFitModelVarIDs ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );
     assert( r >= 0 );
 
     r = se->RegisterGlobalFunction( "int GetNumFitModelTargetPts()", asFUNCTION( vsp::GetNumFitModelTargetPts ), asCALL_CDECL );
@@ -7225,6 +7231,12 @@ CScriptArray* ScriptMgrSingleton::GetGeomTextureIDVec( const string & geom_id )
 CScriptArray* ScriptMgrSingleton::GetFeaTrimPartIDVec( const string & trim_id )
 {
     m_ProxyStringArray = vsp::GetFeaTrimPartIDVec( trim_id );
+    return GetProxyStringArray();
+}
+
+CScriptArray* ScriptMgrSingleton::GetFitModelVarIDs()
+{
+    m_ProxyStringArray = vsp::GetFitModelVarIDs();
     return GetProxyStringArray();
 }
 

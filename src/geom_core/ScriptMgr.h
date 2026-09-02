@@ -302,6 +302,7 @@ private:
     CScriptArray* GetFeaLayerIDVec( const string & material_id );
     CScriptArray* GetGeomTextureIDVec( const string & geom_id );
     CScriptArray* GetFeaTrimPartIDVec( const string & trim_id );
+    CScriptArray* GetFitModelVarIDs();
     CScriptArray* GetPtCloudPnts( const string & geom_id );
     CScriptArray* GetFeaAssemblyIDVec();
     CScriptArray* GetFeaAssemblyStructureIDVec( const string & assembly_id );

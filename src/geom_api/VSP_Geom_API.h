@@ -39118,10 +39118,28 @@ extern bool AddFitModelVar( const std::string & parm_id );
     \ingroup Geom
 */
 /*!
+    Delete a Fit Model variable by Parm ID.
+    \param [in] parm_id string Parm ID
+*/
+extern void DeleteFitModelVar( const std::string & parm_id );
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the number of Fit Model variables.
     \return int Number of Fit Model variables
 */
 extern int GetNumFitModelVars();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get the Fit Model variable Parm IDs.
+    \return vector\<string\> Fit Model variable Parm IDs
+*/
+extern std::vector< std::string > GetFitModelVarIDs();
 
 /*!
     \ingroup Geom
