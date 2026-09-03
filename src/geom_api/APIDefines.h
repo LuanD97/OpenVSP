@@ -620,6 +620,14 @@ enum FEA_CROSS_SECT_TYPE { FEA_XSEC_GENERAL = 0,	/*!< General XSec type */
 /*!
 	\ingroup Enumerations
 */
+/*! Enum for Fit Model target coordinate type. */
+enum FIT_TARGET_TYPE { FIT_FIXED = 0,	/*!< Fixed target coordinate */
+                       FIT_FREE = 1	/*!< Free target coordinate */
+};
+
+/*!
+	\ingroup Enumerations
+*/
 /*! Enum for the various FEA Mesh export types. */
 enum FEA_EXPORT_TYPE { FEA_MASS_FILE_NAME,	/*!< FEA Mesh mass export type */
                        FEA_NASTRAN_FILE_NAME,	/*!< FEA Mesh NASTRAN export type */

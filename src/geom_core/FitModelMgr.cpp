@@ -529,18 +529,37 @@ TargetPt* FitModelMgrSingleton::GetTargetPt( int index )
     return nullptr;
 }
 
+bool FitModelMgrSingleton::DelTargetPt( int index )
+{
+    if ( index < 0 || index >= ( int )m_TargetPts.size() )
+    {
+        return false;
+    }
+
+    TargetPt* tpt = m_TargetPts[index];
+
+    m_TargetPts.erase( m_TargetPts.begin() + index );
+
+    delete tpt;
+
+    if ( m_CurrTargetPtIndex == index )
+    {
+        m_CurrTargetPtIndex = -1;
+    }
+    else if ( m_CurrTargetPtIndex > index )
+    {
+        m_CurrTargetPtIndex--;
+    }
+
+    return true;
+}
+
 void FitModelMgrSingleton::DelCurrTargetPt()
 {
-    if ( m_CurrTargetPtIndex < 0 || m_CurrTargetPtIndex >= ( int )m_TargetPts.size() )
+    if ( !DelTargetPt( m_CurrTargetPtIndex ) )
     {
         return;
     }
-
-    TargetPt* tpt = m_TargetPts[m_CurrTargetPtIndex];
-
-    m_TargetPts.erase( m_TargetPts.begin() +  m_CurrTargetPtIndex );
-
-    delete tpt;
 
     m_CurrTargetPtIndex = -1;
 }
@@ -554,6 +573,22 @@ void FitModelMgrSingleton::DelAllTargetPts()
 
     m_TargetPts.clear();
     m_CurrTargetPtIndex = -1;
+}
+
+bool FitModelMgrSingleton::SetTargetPt( int index, const vec3d & pt, const string & geom_id, const vec2d & uw, int u_type, int w_type )
+{
+    TargetPt* tpt = GetTargetPt( index );
+    if ( !tpt )
+    {
+        return false;
+    }
+
+    tpt->SetPt( pt );
+    tpt->SetMatchGeom( geom_id );
+    tpt->SetUW( uw );
+    tpt->SetUType( u_type );
+    tpt->SetWType( w_type );
+    return true;
 }
 
 void FitModelMgrSingleton::ValidateTargetPts()

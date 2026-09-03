@@ -38,16 +38,16 @@ Recommended rule:
 3. refactor only after tests are green
 4. then move to the next API slice
 
-Suggested slice order for TDD:
+Suggested slice order for TDD (live status):
 
-1. state reset and clear operations
-2. variable add/delete/get APIs
-3. target add/delete/get/set APIs
-4. `SearchFitModelTargetUW` and `RefineFitModelTargetUW`
-5. `UpdateFitModelDistance` and `GetFitModelDistance`
-6. `OptimizeFitModel`
-7. save/load wrappers
-8. AngelScript/Python binding smoke tests
+- [x] 1) state reset and clear operations
+- [x] 2) variable add/delete/get APIs
+- [x] 3) target add/delete/get/set APIs
+- [ ] 4) `SearchFitModelTargetUW` and `RefineFitModelTargetUW`
+- [ ] 5) `UpdateFitModelDistance` and `GetFitModelDistance`
+- [ ] 6) `OptimizeFitModel`
+- [ ] 7) save/load wrappers
+- [ ] 8) AngelScript/Python binding smoke tests
 
 ## Non-Goals for Initial API
 

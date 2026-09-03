@@ -12943,6 +12943,181 @@ Geom* FindGeomForOp( const std::string & geom_id, const std::string & caller )
     return geom_ptr;
 }
 
+static bool IsValidFitTargetType( int type )
+{
+    return type == FIT_FIXED || type == FIT_FREE;
+}
+
+static bool IsSupportedFitTargetGeom( Geom* geom_ptr )
+{
+    if ( !geom_ptr )
+    {
+        return false;
+    }
+
+    int type = geom_ptr->GetType().m_Type;
+    return type != MESH_GEOM_TYPE && type != HUMAN_GEOM_TYPE && type != PT_CLOUD_GEOM_TYPE &&
+           type != WIRE_FRAME_GEOM_TYPE && type != BLANK_GEOM_TYPE && type != HINGE_GEOM_TYPE &&
+           type != NGON_GEOM_TYPE;
+}
+
+static TargetPt* FindFitTargetForOp( int index, const char* operation )
+{
+    TargetPt* tpt = FitModelMgr.GetTargetPt( index );
+    if ( !tpt )
+    {
+        ErrorMgr.AddError( VSP_INDEX_OUT_RANGE, std::string( operation ) + "::Target Index Out Of Range " + to_string( index ) );
+        return nullptr;
+    }
+    return tpt;
+}
+
+int AddFitModelTargetPt( const vec3d & target_pt, const std::string & target_geom_id, double u, int u_type, double w, int w_type )
+{
+    Geom* geom_ptr = FindGeomForOp( target_geom_id, "AddFitModelTargetPt" );
+    if ( !geom_ptr )
+    {
+        return -1;
+    }
+
+    if ( !IsSupportedFitTargetGeom( geom_ptr ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_TYPE, "AddFitModelTargetPt::Geom " + target_geom_id + " is not a supported Fit Model target" );
+        return -1;
+    }
+
+    if ( !IsValidFitTargetType( u_type ) || !IsValidFitTargetType( w_type ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_TYPE, "AddFitModelTargetPt::Invalid target type" );
+        return -1;
+    }
+
+    if ( !std::isfinite( target_pt.x() ) || !std::isfinite( target_pt.y() ) || !std::isfinite( target_pt.z() ) || !std::isfinite( u ) || !std::isfinite( w ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "AddFitModelTargetPt::Non-finite input" );
+        return -1;
+    }
+
+    TargetPt* tpt = new TargetPt();
+    tpt->SetPt( target_pt );
+    tpt->SetMatchGeom( target_geom_id );
+    tpt->SetUW( vec2d( u, w ) );
+    tpt->SetUType( u_type );
+    tpt->SetWType( w_type );
+
+    FitModelMgr.AddTargetPt( tpt );
+
+    ErrorMgr.NoError();
+    return FitModelMgr.GetNumTargetPt() - 1;
+}
+
+void DeleteFitModelTargetPt( int target_index )
+{
+    if ( !FitModelMgr.DelTargetPt( target_index ) )
+    {
+        ErrorMgr.AddError( VSP_INDEX_OUT_RANGE, "DeleteFitModelTargetPt::Target Index Out Of Range " + to_string( target_index ) );
+        return;
+    }
+
+    ErrorMgr.NoError();
+}
+
+vec3d GetFitModelTargetPt( int target_index )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "GetFitModelTargetPt" );
+    if ( !tpt )
+    {
+        return vec3d();
+    }
+
+    ErrorMgr.NoError();
+    return tpt->GetPt();
+}
+
+std::string GetFitModelTargetGeomID( int target_index )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "GetFitModelTargetGeomID" );
+    if ( !tpt )
+    {
+        return std::string();
+    }
+
+    ErrorMgr.NoError();
+    return tpt->GetMatchGeom();
+}
+
+vec2d GetFitModelTargetUW( int target_index )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "GetFitModelTargetUW" );
+    if ( !tpt )
+    {
+        return vec2d();
+    }
+
+    ErrorMgr.NoError();
+    return tpt->GetUW();
+}
+
+int GetFitModelTargetUType( int target_index )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "GetFitModelTargetUType" );
+    if ( !tpt )
+    {
+        return FIT_FIXED;
+    }
+
+    ErrorMgr.NoError();
+    return tpt->GetUType();
+}
+
+int GetFitModelTargetWType( int target_index )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "GetFitModelTargetWType" );
+    if ( !tpt )
+    {
+        return FIT_FIXED;
+    }
+
+    ErrorMgr.NoError();
+    return tpt->GetWType();
+}
+
+void SetFitModelTargetPt( int target_index, const vec3d & target_pt, const std::string & target_geom_id, double u, int u_type, double w, int w_type )
+{
+    TargetPt* tpt = FindFitTargetForOp( target_index, "SetFitModelTargetPt" );
+    if ( !tpt )
+    {
+        return;
+    }
+
+    Geom* geom_ptr = FindGeomForOp( target_geom_id, "SetFitModelTargetPt" );
+    if ( !geom_ptr )
+    {
+        return;
+    }
+
+    if ( !IsSupportedFitTargetGeom( geom_ptr ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_TYPE, "SetFitModelTargetPt::Geom " + target_geom_id + " is not a supported Fit Model target" );
+        return;
+    }
+
+    if ( !IsValidFitTargetType( u_type ) || !IsValidFitTargetType( w_type ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_TYPE, "SetFitModelTargetPt::Invalid target type" );
+        return;
+    }
+
+    if ( !std::isfinite( target_pt.x() ) || !std::isfinite( target_pt.y() ) || !std::isfinite( target_pt.z() ) || !std::isfinite( u ) || !std::isfinite( w ) )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "SetFitModelTargetPt::Non-finite input" );
+        return;
+    }
+
+    FitModelMgr.SetTargetPt( target_index, target_pt, target_geom_id, vec2d( u, w ), u_type, w_type );
+    ErrorMgr.NoError();
+}
+
 void CopyAirfoil( const std::string & geom_id, int index )
 {
     Geom* geom_ptr = FindGeomForOp( geom_id, "CopyAirfoil" );

@@ -25,6 +25,7 @@
 #include <scriptfile/scriptfilesystem.h>
 #include <scriptmath/scriptmath.h>
 
+#include "Vec2d.h"
 #include "Vec3d.h"
 #include "XmlUtil.h"
 #include "main.h"
@@ -119,6 +120,7 @@ private:
     ScriptMgrSingleton& operator=( ScriptMgrSingleton const& copy ) = delete; // Not Implemented
 
     static void RegisterEnums( asIScriptEngine* se );
+    static void RegisterVec2d( asIScriptEngine* se );
     static void RegisterVec3d( asIScriptEngine* se );
     static void RegisterMatrix4d( asIScriptEngine* se );
     static void RegisterCustomGeomMgr( asIScriptEngine* se );

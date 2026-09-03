@@ -182,8 +182,10 @@ public:
     void AddTargetPt( TargetPt *tpt );
     TargetPt* GetCurrTargetPt();
     virtual TargetPt* GetTargetPt( int index );
+    bool DelTargetPt( int index );
     void DelCurrTargetPt();
     void DelAllTargetPts();
+    bool SetTargetPt( int index, const vec3d & pt, const string & geom_id, const vec2d & uw, int u_type, int w_type );
     void ValidateTargetPts();
 
     int GetNumTargetPt()

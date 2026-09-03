@@ -136,6 +136,7 @@ void ScriptMgrSingleton::Init( )
     RegisterEnums( m_ScriptEngine );
 
     //==== Register VSP Objects ====//
+    RegisterVec2d( m_ScriptEngine );
     RegisterVec3d( m_ScriptEngine );
     m_Vec3dArrayType  = se->GetTypeInfoById( se->GetTypeIdByDecl( "array<vec3d>" ) );
     assert( m_Vec3dArrayType );
@@ -1168,6 +1169,13 @@ void ScriptMgrSingleton::RegisterEnums( asIScriptEngine* se )
     r = se->RegisterEnum( "FEA_EXPORT_TYPE" );
     assert( r >= 0 );
     r = se->RegisterEnumValue( "FEA_EXPORT_TYPE", "FEA_MASS_FILE_NAME", FEA_MASS_FILE_NAME );
+    assert( r >= 0 );
+
+    r = se->RegisterEnum( "FIT_TARGET_TYPE" );
+    assert( r >= 0 );
+    r = se->RegisterEnumValue( "FIT_TARGET_TYPE", "FIT_FIXED", FIT_FIXED );
+    assert( r >= 0 );
+    r = se->RegisterEnumValue( "FIT_TARGET_TYPE", "FIT_FREE", FIT_FREE );
     assert( r >= 0 );
     r = se->RegisterEnumValue( "FEA_EXPORT_TYPE", "FEA_NASTRAN_FILE_NAME", FEA_NASTRAN_FILE_NAME );
     assert( r >= 0 );
@@ -2847,6 +2855,56 @@ void ScriptMgrSingleton::RegisterEnums( asIScriptEngine* se )
     //
 }
 
+//==== Vec2d Constructors ====//
+static void Vec2dDefaultConstructor( vec2d *self )
+{
+    new( self ) vec2d();
+}
+
+static void Vec2dInitConstructor( double x, double y, vec2d *self )
+{
+    new( self ) vec2d( x, y );
+}
+
+static void Vec2dCopyConstructor( const vec2d & other, vec2d *self )
+{
+    new( self ) vec2d( other );
+}
+
+//==== Register Vec2d Object ====//
+void ScriptMgrSingleton::RegisterVec2d( asIScriptEngine* se )
+{
+    int r = se->RegisterObjectType( "vec2d", sizeof( vec2d ), asOBJ_VALUE | asOBJ_POD | asGetTypeTraits< vec2d >() | asOBJ_APP_CLASS_ALLFLOATS | asOBJ_APP_CLASS_ALIGN8 );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectBehaviour( "vec2d", asBEHAVE_CONSTRUCT, "void f()", asFUNCTION( Vec2dDefaultConstructor ), asCALL_CDECL_OBJLAST );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectBehaviour( "vec2d", asBEHAVE_CONSTRUCT, "void f(double, double)", asFUNCTION( Vec2dInitConstructor ), asCALL_CDECL_OBJLAST );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectBehaviour( "vec2d", asBEHAVE_CONSTRUCT, "void f(const vec2d &in)", asFUNCTION( Vec2dCopyConstructor ), asCALL_CDECL_OBJLAST );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "double& opIndex(int) const", asMETHODPR( vec2d, operator[], ( int ), double& ), asCALL_THISCALL );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "double x() const", asMETHOD( vec2d, x ), asCALL_THISCALL );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "double y() const", asMETHOD( vec2d, y ), asCALL_THISCALL );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "vec2d& set_xy(double x, double y)", asMETHOD( vec2d, set_xy ), asCALL_THISCALL );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "vec2d& set_x(double x)", asMETHOD( vec2d, set_x ), asCALL_THISCALL );
+    assert( r >= 0 );
+
+    r = se->RegisterObjectMethod( "vec2d", "vec2d& set_y(double y)", asMETHOD( vec2d, set_y ), asCALL_THISCALL );
+    assert( r >= 0 );
+}
+
 //==== Vec3d Constructors ====//
 static void Vec3dDefaultConstructor( vec3d *self )
 {
@@ -3321,7 +3379,31 @@ void ScriptMgrSingleton::RegisterAdvLinkMgr( asIScriptEngine* se )
     r = se->RegisterGlobalFunction( "array<string>@+ GetFitModelVarIDs()", asMETHOD( ScriptMgrSingleton, GetFitModelVarIDs ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );
     assert( r >= 0 );
 
+    r = se->RegisterGlobalFunction( "int AddFitModelTargetPt( const vec3d & in target_pt, const string & in target_geom_id, double u = 0.5, int u_type = FIT_FREE, double w = 0.5, int w_type = FIT_FREE )", asFUNCTION( vsp::AddFitModelTargetPt ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "void DeleteFitModelTargetPt( int target_index )", asFUNCTION( vsp::DeleteFitModelTargetPt ), asCALL_CDECL );
+    assert( r >= 0 );
+
     r = se->RegisterGlobalFunction( "int GetNumFitModelTargetPts()", asFUNCTION( vsp::GetNumFitModelTargetPts ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "vec3d GetFitModelTargetPt( int target_index )", asFUNCTION( vsp::GetFitModelTargetPt ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "string GetFitModelTargetGeomID( int target_index )", asFUNCTION( vsp::GetFitModelTargetGeomID ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "vec2d GetFitModelTargetUW( int target_index )", asFUNCTION( vsp::GetFitModelTargetUW ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "int GetFitModelTargetUType( int target_index )", asFUNCTION( vsp::GetFitModelTargetUType ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "int GetFitModelTargetWType( int target_index )", asFUNCTION( vsp::GetFitModelTargetWType ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "void SetFitModelTargetPt( int target_index, const vec3d & in target_pt, const string & in target_geom_id, double u, int u_type, double w, int w_type )", asFUNCTION( vsp::SetFitModelTargetPt ), asCALL_CDECL );
     assert( r >= 0 );
 
     r = se->RegisterGlobalFunction( "array<vec3d>@+ GetPtCloudPnts( const string & in geom_id )", asMETHOD( ScriptMgrSingleton, GetPtCloudPnts ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );

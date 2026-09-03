@@ -228,6 +228,7 @@
 #include <stack>
 #include <vector>
 
+class vec2d;
 class vec3d;
 class Matrix4d;
 
@@ -39145,10 +39146,74 @@ extern std::vector< std::string > GetFitModelVarIDs();
     \ingroup Geom
 */
 /*!
+    Add a Fit Model target point.
+*/
+extern int AddFitModelTargetPt( const vec3d & target_pt, const std::string & target_geom_id, double u = 0.5, int u_type = FIT_FREE, double w = 0.5, int w_type = FIT_FREE );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Delete a Fit Model target point by index.
+*/
+extern void DeleteFitModelTargetPt( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the number of Fit Model target points.
     \return int Number of Fit Model target points
 */
 extern int GetNumFitModelTargetPts();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get a Fit Model target point.
+*/
+extern vec3d GetFitModelTargetPt( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get a Fit Model target geometry ID.
+*/
+extern std::string GetFitModelTargetGeomID( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get a Fit Model target UW value.
+*/
+extern vec2d GetFitModelTargetUW( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get a Fit Model target U type.
+*/
+extern int GetFitModelTargetUType( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get a Fit Model target W type.
+*/
+extern int GetFitModelTargetWType( int target_index );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Set a Fit Model target point.
+*/
+extern void SetFitModelTargetPt( int target_index, const vec3d & target_pt, const std::string & target_geom_id, double u, int u_type, double w, int w_type );
 
 /*!
     \ingroup Geom
