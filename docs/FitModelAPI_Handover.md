@@ -83,6 +83,15 @@ Tests:
 3) Target creation intentionally does NOT auto-search UW
 - Per `docs/FitModelAPI.md`, `AddFitModelTargetPt` only stores pt + initial UW/types; it does not call `SearchUW`.
 
+4) Optional GUI visualization requires graphics-enabled build
+- The FitModel API is designed for headless use first.
+- If the user wants live visualization while Python drives the API, OpenVSP must be built with graphics enabled (`VSP_NO_GRAPHICS=OFF`, FLTK available).
+- Use facade mode with:
+  - `openvsp_config.LOAD_GRAPHICS = True`
+  - `openvsp_config.LOAD_FACADE = True`
+- This should show model state changes in a facade-owned GUI while Python continues running.
+- Do not assume per-iteration optimize animation; current solver path is blocking unless later instrumented.
+
 ## What to do next (Slice 6)
 
 ### Slice 6 APIs to implement
@@ -108,6 +117,10 @@ Suggested tests to add:
   - compute `after = UpdateFitModelDistance()`
   - assert `after < before` (allow tolerance)
 - Add negative tests for precondition guards.
+- Optional manual smoke check for GUI visualization path after graphics-enabled rebuild:
+  - load with `LOAD_GRAPHICS = True` and `LOAD_FACADE = True`
+  - `InitGUI()` / `StartGUI()`
+  - run FitModel setup calls and confirm GUI reflects state changes
 
 ### Slice 7
 `SaveFitModel` / `LoadFitModel` wrappers.

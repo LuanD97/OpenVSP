@@ -357,6 +357,36 @@ vsp.WriteVSPFile("fitted_aircraft.vsp3", vsp.SET_ALL)
 
 Parameter names above are illustrative; production scripts should verify actual parameter IDs from created geometry.
 
+### Optional live GUI visualization workflow
+
+The primary goal of this API is still headless fitting, but the same API should also support an optional live OpenVSP GUI view when the Python facade is used.
+
+Requirements:
+
+- OpenVSP must be built with graphics enabled (`VSP_NO_GRAPHICS=OFF`, FLTK available).
+- Python must load OpenVSP with both `LOAD_GRAPHICS = True` and `LOAD_FACADE = True`.
+- In this mode, Python drives the API while a facade-owned OpenVSP GUI process stays interactive and shows the same in-memory model state.
+
+Example:
+
+```python
+import openvsp_config
+openvsp_config.LOAD_GRAPHICS = True
+openvsp_config.LOAD_FACADE = True
+import openvsp as vsp
+
+vsp.InitGUI()
+vsp.StartGUI()
+
+# Normal FitModel API calls continue here.
+# Geometry / target updates should be visible in the GUI.
+```
+
+Expected behavior:
+
+- state setup, target creation, target UW search/refine, distance updates, and final optimization result should be visible in the GUI
+- long blocking solver calls may not animate every internal iteration unless explicit progress instrumentation is added later
+
 ## Tests
 
 Add API tests near existing geometry API tests.
