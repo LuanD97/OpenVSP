@@ -56,6 +56,7 @@
 
 #include <cstdlib>
 #include <csignal>
+#include <fstream>
 
 #include "APIUpdateCountMgr.h"
 #include "eli/mutil/quad/simpson.hpp"
@@ -13358,6 +13359,46 @@ int OptimizeFitModel()
     FitModelMgr.UpdateDist();
     ErrorMgr.NoError();
     return info;
+}
+
+bool SaveFitModel( const std::string & file_name )
+{
+    FitModelMgr.SetSaveFitFileName( file_name );
+    if ( !FitModelMgr.Save() )
+    {
+        ErrorMgr.AddError( VSP_FILE_WRITE_FAILURE, "SaveFitModel::Failure Writing File " + file_name );
+        return false;
+    }
+
+    ErrorMgr.NoError();
+    return true;
+}
+
+int LoadFitModel( const std::string & file_name, bool clear_existing )
+{
+    if ( clear_existing )
+    {
+        FitModelMgr.Renew();
+    }
+
+    FitModelMgr.SetLoadFitFileName( file_name );
+    int err = FitModelMgr.Load();
+    if ( err != 0 )
+    {
+        std::ifstream fit_file( file_name.c_str() );
+        if ( !fit_file.good() )
+        {
+            ErrorMgr.AddError( VSP_FILE_DOES_NOT_EXIST, "LoadFitModel::Can't Read File " + file_name );
+        }
+        else
+        {
+            ErrorMgr.AddError( VSP_WRONG_FILE_TYPE, "LoadFitModel::Error Reading File " + file_name );
+        }
+        return err;
+    }
+
+    ErrorMgr.NoError();
+    return err;
 }
 
 bool AddFitModelVar( const std::string & parm_id )

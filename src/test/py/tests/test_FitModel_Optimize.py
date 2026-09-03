@@ -30,7 +30,9 @@ def testFitModel_Optimize_ReducesDistance_ForSingleParm():
     vsp.Update()
 
     assert vsp.AddFitModelVar(length_id) is True
-    idx = vsp.AddFitModelTargetPt(target_pt, geom_id, u, vsp.FIT_FIXED, w, vsp.FIT_FIXED)
+    idx = vsp.AddFitModelTargetPt(
+        target_pt, geom_id, u, vsp.FIT_FIXED, w, vsp.FIT_FIXED
+    )
     assert idx == 0
 
     before = vsp.UpdateFitModelDistance()
@@ -58,7 +60,9 @@ def testFitModel_Optimize_Guards():
     geom_id = vsp.AddGeom("POD", "")
     target_pt = vsp.CompPnt01(geom_id, 0, 0.25, 0.75)
 
-    idx = vsp.AddFitModelTargetPt(target_pt, geom_id, 0.25, vsp.FIT_FIXED, 0.75, vsp.FIT_FIXED)
+    idx = vsp.AddFitModelTargetPt(
+        target_pt, geom_id, 0.25, vsp.FIT_FIXED, 0.75, vsp.FIT_FIXED
+    )
     assert idx == 0
 
     assert vsp.OptimizeFitModel() == 0
@@ -71,7 +75,9 @@ def testFitModel_Optimize_Guards():
     assert vsp.AddFitModelVar(length_id) is True
     assert vsp.AddFitModelVar(fine_ratio_id) is True
 
-    idx = vsp.AddFitModelTargetPt(target_pt, geom_id, 0.25, vsp.FIT_FREE, 0.75, vsp.FIT_FREE)
+    idx = vsp.AddFitModelTargetPt(
+        target_pt, geom_id, 0.25, vsp.FIT_FREE, 0.75, vsp.FIT_FREE
+    )
     assert idx == 0
 
     assert vsp.OptimizeFitModel() == 0

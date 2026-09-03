@@ -4,6 +4,17 @@
 
 Expose `FitModelMgr` through OpenVSP public C++, AngelScript, and generated Python APIs so point-cloud-to-parametric-geometry fitting can run headlessly.
 
+## Current status (as of 2026-09-04)
+
+Initial planned API slices 1-8 are complete:
+
+- public C++ wrappers implemented
+- AngelScript registrations implemented
+- generated Python bindings exercised by pytest coverage
+- AngelScript smoke coverage added via `src/test/scripttest/TestFitModel.vspscript`
+
+Remaining items mentioned in this document are optional follow-up work unless explicitly re-scoped.
+
 See also:
 
 - `docs/FitModelMGR.md` for how the existing optimizer works internally
@@ -45,9 +56,9 @@ Suggested slice order for TDD (live status):
 - [x] 3) target add/delete/get/set APIs
 - [x] 4) `SearchFitModelTargetUW` and `RefineFitModelTargetUW`
 - [x] 5) `UpdateFitModelDistance` and `GetFitModelDistance`
-- [ ] 6) `OptimizeFitModel`
-- [ ] 7) save/load wrappers
-- [ ] 8) AngelScript/Python binding smoke tests
+- [x] 6) `OptimizeFitModel`
+- [x] 7) save/load wrappers
+- [x] 8) AngelScript/Python binding smoke tests
 
 ## Non-Goals for Initial API
 

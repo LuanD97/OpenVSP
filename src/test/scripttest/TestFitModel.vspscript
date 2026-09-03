@@ -1,0 +1,173 @@
+int checkVec3dClose( const vec3d & in got, const vec3d & in expected, double tol )
+{
+    if ( !closeTo( got.x(), expected.x(), tol ) || !closeTo( got.y(), expected.y(), tol ) || !closeTo( got.z(), expected.z(), tol ) )
+    {
+        return 1;
+    }
+    return 0;
+}
+
+int main()
+{
+    int failure = 0;
+
+    ClearVSPModel();
+    ResetFitModel();
+
+    string geom_id = AddGeom( "POD", "" );
+    string length_id = FindParm( geom_id, "Length", "Design" );
+
+    if ( length_id.length() == 0 )
+    {
+        Print( "FAIL FindParm returned empty Length id" );
+        return 1;
+    }
+
+    if ( !AddFitModelVar( length_id ) )
+    {
+        Print( "FAIL AddFitModelVar rejected valid parm" );
+        failure++;
+    }
+
+    double baseline_length = GetParmVal( length_id );
+    double target_length = baseline_length * 1.5;
+    double u = 0.35;
+    double w = 0.60;
+
+    SetParmVal( length_id, target_length );
+    Update();
+    vec3d target_pt = CompPnt01( geom_id, 0, u, w );
+
+    SetParmVal( length_id, baseline_length );
+    Update();
+
+    int target_index = AddFitModelTargetPt( target_pt, geom_id, u, FIT_FIXED, w, FIT_FIXED );
+    if ( target_index != 0 )
+    {
+        Print( "FAIL AddFitModelTargetPt did not return index 0" );
+        failure++;
+    }
+
+    if ( GetNumFitModelVars() != 1 )
+    {
+        Print( "FAIL GetNumFitModelVars mismatch" );
+        failure++;
+    }
+
+    if ( GetNumFitModelTargetPts() != 1 )
+    {
+        Print( "FAIL GetNumFitModelTargetPts mismatch" );
+        failure++;
+    }
+
+    if ( GetFitModelTargetGeomID( 0 ) != geom_id )
+    {
+        Print( "FAIL GetFitModelTargetGeomID mismatch" );
+        failure++;
+    }
+
+    if ( GetFitModelTargetUType( 0 ) != FIT_FIXED || GetFitModelTargetWType( 0 ) != FIT_FIXED )
+    {
+        Print( "FAIL target type mismatch" );
+        failure++;
+    }
+
+    if ( checkVec3dClose( GetFitModelTargetPt( 0 ), target_pt, 1e-9 ) != 0 )
+    {
+        Print( "FAIL GetFitModelTargetPt mismatch" );
+        failure++;
+    }
+
+    SearchFitModelTargetUW();
+    RefineFitModelTargetUW();
+
+    vec2d uw = GetFitModelTargetUW( 0 );
+    if ( !closeTo( uw.x(), u, 1e-9 ) || !closeTo( uw.y(), w, 1e-9 ) )
+    {
+        Print( "FAIL GetFitModelTargetUW mismatch" );
+        failure++;
+    }
+
+    double before = UpdateFitModelDistance();
+    int info = OptimizeFitModel();
+    double after = GetFitModelDistance();
+
+    if ( info <= 0 )
+    {
+        Print( "FAIL OptimizeFitModel returned non-positive info" );
+        failure++;
+    }
+
+    if ( !( after < before ) )
+    {
+        Print( "FAIL OptimizeFitModel did not reduce distance" );
+        failure++;
+    }
+
+    if ( !closeTo( after, 0.0, 1e-6 ) )
+    {
+        Print( "FAIL optimized distance not near zero" );
+        failure++;
+    }
+
+    if ( !closeTo( GetParmVal( length_id ), target_length, 1e-6 ) )
+    {
+        Print( "FAIL optimized parm value mismatch" );
+        failure++;
+    }
+
+    string fit_file = "TestFitModel.fit";
+    if ( !SaveFitModel( fit_file ) )
+    {
+        Print( "FAIL SaveFitModel failed" );
+        failure++;
+    }
+
+    ResetFitModel();
+    if ( GetNumFitModelVars() != 0 || GetNumFitModelTargetPts() != 0 )
+    {
+        Print( "FAIL ResetFitModel did not clear state" );
+        failure++;
+    }
+
+    if ( LoadFitModel( fit_file ) != 0 )
+    {
+        Print( "FAIL LoadFitModel failed" );
+        failure++;
+    }
+
+    if ( GetNumFitModelVars() != 1 || GetNumFitModelTargetPts() != 1 )
+    {
+        Print( "FAIL loaded FitModel counts mismatch" );
+        failure++;
+    }
+
+    if ( GetFitModelTargetGeomID( 0 ) != geom_id )
+    {
+        Print( "FAIL loaded target geom mismatch" );
+        failure++;
+    }
+
+    if ( checkVec3dClose( GetFitModelTargetPt( 0 ), target_pt, 1e-9 ) != 0 )
+    {
+        Print( "FAIL loaded target point mismatch" );
+        failure++;
+    }
+
+    uw = GetFitModelTargetUW( 0 );
+    if ( !closeTo( uw.x(), u, 1e-9 ) || !closeTo( uw.y(), w, 1e-9 ) )
+    {
+        Print( "FAIL loaded UW mismatch" );
+        failure++;
+    }
+
+    //==== Check For API Errors ====//
+    while ( GetNumTotalErrors() > 0 )
+    {
+        ErrorObj err = PopLastError();
+        Print( err.GetErrorString() );
+        failure++;
+    }
+
+    return failure;
+}

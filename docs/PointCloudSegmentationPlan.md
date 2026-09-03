@@ -4,6 +4,14 @@
 
 This document lays out a practical external workflow for preparing an aircraft point cloud **before** sending targets into the proposed Fit Model API described in `docs/FitModelAPI.md`.
 
+## Current status (as of 2026-09-04)
+
+This document remains a planning/reference workflow.
+
+- Fit Model API slices 1-8 are now implemented separately
+- the external segmentation pipeline described here is still not implemented inside OpenVSP
+- this document should still be treated as recommended pre-fit workflow guidance rather than completed product scope
+
 See also:
 
 - `docs/FitModelAPI.md` for the proposed external API used after segmentation

@@ -1,6 +1,6 @@
 # FitModel API – Agent Handover (next slices)
 
-## Current status (as of 2026-09-03)
+## Current status (as of 2026-09-04)
 
 Slices completed and green:
 - Slice 1: state reset/clear API
@@ -8,6 +8,9 @@ Slices completed and green:
 - Slice 3: target point lifecycle API (add/delete/get/set + FIT_TARGET_TYPE enum)
 - Slice 4: target UW search/refine API
 - Slice 5: distance metric API
+- Slice 6: `OptimizeFitModel()`
+- Slice 7: `SaveFitModel()` / `LoadFitModel()`
+- Slice 8: AngelScript binding smoke test coverage
 
 Pytests passing:
 - `src/test/py/tests/test_FitModel_State.py`
@@ -15,6 +18,11 @@ Pytests passing:
 - `src/test/py/tests/test_FitModel_TargetPts.py`
 - `src/test/py/tests/test_FitModel_TargetUW.py`
 - `src/test/py/tests/test_FitModel_Distance.py`
+- `src/test/py/tests/test_FitModel_Optimize.py`
+- `src/test/py/tests/test_FitModel_Persistence.py`
+
+Script test passing:
+- `src/test/scripttest/TestFitModel.vspscript`
 
 ## How to build + run tests (important)
 
@@ -39,7 +47,7 @@ Public API:
 - `src/geom_api/APIDefines.h`
   - Added `FIT_TARGET_TYPE { FIT_FIXED=0, FIT_FREE=1 }`
 - `src/geom_api/VSP_Geom_API.h`
-  - Added FitModel state/vars/targets declarations
+  - Added FitModel state/vars/targets/solver/persistence declarations
 - `src/geom_api/VSP_Geom_API.cpp`
   - Implemented:
     - Slice 1: `ResetFitModel`, `ClearFitModelVars`, `ClearFitModelTargetPts`
@@ -47,6 +55,8 @@ Public API:
     - Slice 3: `AddFitModelTargetPt`, `DeleteFitModelTargetPt`, `GetFitModelTargetPt`, `GetFitModelTargetGeomID`, `GetFitModelTargetUW`, `GetFitModelTargetUType`, `GetFitModelTargetWType`, `SetFitModelTargetPt`
     - Slice 4: `SearchFitModelTargetUW`, `RefineFitModelTargetUW`
     - Slice 5: `UpdateFitModelDistance`, `GetFitModelDistance`
+    - Slice 6: `OptimizeFitModel`
+    - Slice 7: `SaveFitModel`, `LoadFitModel`
   - Helper validation functions were added near `FindGeomForOp`.
 
 Core manager:
@@ -62,7 +72,7 @@ AngelScript bindings:
 - `src/geom_core/ScriptMgr.h/.cpp`
   - Registered:
     - `FIT_TARGET_TYPE` enum values
-    - all FitModel slice 1-5 functions
+    - all FitModel slice 1-7 functions
     - `vec2d` AngelScript value type (needed because target UW getter returns `vec2d`)
 
 Tests:
@@ -70,6 +80,9 @@ Tests:
 - `src/test/py/tests/test_FitModel_TargetPts.py`
 - `src/test/py/tests/test_FitModel_TargetUW.py`
 - `src/test/py/tests/test_FitModel_Distance.py`
+- `src/test/py/tests/test_FitModel_Optimize.py`
+- `src/test/py/tests/test_FitModel_Persistence.py`
+- `src/test/scripttest/TestFitModel.vspscript`
 
 ## Known nuances / gotchas
 
@@ -92,41 +105,15 @@ Tests:
 - This should show model state changes in a facade-owned GUI while Python continues running.
 - Do not assume per-iteration optimize animation; current solver path is blocking unless later instrumented.
 
-## What to do next (Slice 6)
+## Remaining work
 
-### Slice 6 APIs to implement
-From `docs/FitModelAPI.md`:
-- `OptimizeFitModel()`
+Initial planned slices are complete through slice 8.
 
-Expected behavior:
-- wrapper should call `FitModelMgr.Optimize()`
-- add API-level precondition guards **before** allocation/`lmder1`:
-  - `GetNumFitModelTargetPts() > 0`
-  - at least 1 optimization DOF (fit var or free target U/W)
-  - residual dimension adequate: `3 * target_count >= opt_var_count`
-- return `lmder1` info code on success
-- follow ErrorMgr patterns: `ErrorMgr.NoError()` on success, meaningful error code on invalid input.
-
-Suggested tests to add:
-- Build simple deterministic case with 1 geom (POD works):
-  - create target point from known surface coordinate via `CompPnt01` + offset
-  - set target UW fixed to keep problem stable
-  - add 1 fit variable (e.g. POD length)
-  - compute `before = UpdateFitModelDistance()`
-  - `info = OptimizeFitModel()`
-  - compute `after = UpdateFitModelDistance()`
-  - assert `after < before` (allow tolerance)
-- Add negative tests for precondition guards.
-- Optional manual smoke check for GUI visualization path after graphics-enabled rebuild:
-  - load with `LOAD_GRAPHICS = True` and `LOAD_FACADE = True`
-  - `InitGUI()` / `StartGUI()`
-  - run FitModel setup calls and confirm GUI reflects state changes
-
-### Slice 7
-`SaveFitModel` / `LoadFitModel` wrappers.
-
-### Slice 8
-Binding smoke tests (AngelScript script calling new APIs).
+Optional follow-up work only:
+- transactional `LoadFitModel()` behavior on failure
+- richer persistence semantics if desired
+- additional AngelScript coverage beyond the current smoke test
+- optional GUI/facade manual smoke tests for live visualization workflows
 
 ## Quick verification commands
 
@@ -134,7 +121,8 @@ After implementing new slices:
 1) rebuild:
 - `cd /home/luan/build/openvsp/vsp && cmake --build . -- -j2`
 
-2) run FitModel tests:
-- `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py src/test/py/tests/test_FitModel_TargetUW.py src/test/py/tests/test_FitModel_Distance.py -q`
+2) run FitModel python tests:
+- `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py src/test/py/tests/test_FitModel_TargetUW.py src/test/py/tests/test_FitModel_Distance.py src/test/py/tests/test_FitModel_Optimize.py src/test/py/tests/test_FitModel_Persistence.py -q`
 
-(Plus any new tests you add for slices 6+.)
+3) run FitModel AngelScript smoke test:
+- `cd /home/luan/build/openvsp/vsp && ctest -R FitModel --output-on-failure`

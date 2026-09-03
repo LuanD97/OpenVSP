@@ -3421,6 +3421,12 @@ void ScriptMgrSingleton::RegisterAdvLinkMgr( asIScriptEngine* se )
     r = se->RegisterGlobalFunction( "int OptimizeFitModel()", asFUNCTION( vsp::OptimizeFitModel ), asCALL_CDECL );
     assert( r >= 0 );
 
+    r = se->RegisterGlobalFunction( "bool SaveFitModel( const string & in file_name )", asFUNCTION( vsp::SaveFitModel ), asCALL_CDECL );
+    assert( r >= 0 );
+
+    r = se->RegisterGlobalFunction( "int LoadFitModel( const string & in file_name, bool clear_existing = true )", asFUNCTION( vsp::LoadFitModel ), asCALL_CDECL );
+    assert( r >= 0 );
+
     r = se->RegisterGlobalFunction( "array<vec3d>@+ GetPtCloudPnts( const string & in geom_id )", asMETHOD( ScriptMgrSingleton, GetPtCloudPnts ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );
     assert( r >= 0 );
 

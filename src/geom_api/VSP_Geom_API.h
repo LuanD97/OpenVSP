@@ -39259,6 +39259,22 @@ extern int OptimizeFitModel();
     \ingroup Geom
 */
 /*!
+    Save current Fit Model state to a `.fit` file.
+*/
+extern bool SaveFitModel( const std::string & file_name );
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Load Fit Model state from a `.fit` file.
+*/
+extern int LoadFitModel( const std::string & file_name, bool clear_existing = true );
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the points of a Point Cloud Geom
     \forcpponly
     \code{.cpp}
