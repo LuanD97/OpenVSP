@@ -39235,6 +39235,22 @@ extern void RefineFitModelTargetUW();
     \ingroup Geom
 */
 /*!
+    Recompute and return current Fit Model RMS distance metric.
+*/
+extern double UpdateFitModelDistance();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Get cached Fit Model RMS distance metric without recomputing.
+*/
+extern double GetFitModelDistance();
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the points of a Point Cloud Geom
     \forcpponly
     \code{.cpp}

@@ -6,11 +6,15 @@ Slices completed and green:
 - Slice 1: state reset/clear API
 - Slice 2: variable lifecycle API
 - Slice 3: target point lifecycle API (add/delete/get/set + FIT_TARGET_TYPE enum)
+- Slice 4: target UW search/refine API
+- Slice 5: distance metric API
 
 Pytests passing:
 - `src/test/py/tests/test_FitModel_State.py`
 - `src/test/py/tests/test_FitModel_Vars.py`
 - `src/test/py/tests/test_FitModel_TargetPts.py`
+- `src/test/py/tests/test_FitModel_TargetUW.py`
+- `src/test/py/tests/test_FitModel_Distance.py`
 
 ## How to build + run tests (important)
 
@@ -24,7 +28,7 @@ From the source root:
 - Run a single test:
   - `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_TargetPts.py -q`
 - Run all FitModel tests:
-  - `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py -q`
+  - `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py src/test/py/tests/test_FitModel_TargetUW.py src/test/py/tests/test_FitModel_Distance.py -q`
 
 Rebuild (generates fresh python bindings into the venv editable package):
 - Build from: `/home/luan/build/openvsp/vsp`
@@ -41,6 +45,8 @@ Public API:
     - Slice 1: `ResetFitModel`, `ClearFitModelVars`, `ClearFitModelTargetPts`
     - Slice 2: `AddFitModelVar`, `DeleteFitModelVar`, `GetNumFitModelVars`, `GetFitModelVarIDs`
     - Slice 3: `AddFitModelTargetPt`, `DeleteFitModelTargetPt`, `GetFitModelTargetPt`, `GetFitModelTargetGeomID`, `GetFitModelTargetUW`, `GetFitModelTargetUType`, `GetFitModelTargetWType`, `SetFitModelTargetPt`
+    - Slice 4: `SearchFitModelTargetUW`, `RefineFitModelTargetUW`
+    - Slice 5: `UpdateFitModelDistance`, `GetFitModelDistance`
   - Helper validation functions were added near `FindGeomForOp`.
 
 Core manager:
@@ -48,17 +54,22 @@ Core manager:
   - Added index-based helpers:
     - `bool DelTargetPt( int index );`
     - `bool SetTargetPt( int index, ... );`
+  - Slice 5 safety fixes:
+    - `FitModelMgrSingleton::UpdateDist()` empty-target guard (prevents div-by-zero)
+    - reset cached `m_DistMetric` on `Wype()`
 
 AngelScript bindings:
 - `src/geom_core/ScriptMgr.h/.cpp`
   - Registered:
     - `FIT_TARGET_TYPE` enum values
-    - all FitModel slice 1/2/3 functions
+    - all FitModel slice 1-5 functions
     - `vec2d` AngelScript value type (needed because target UW getter returns `vec2d`)
 
 Tests:
 - `src/test/py/tests/test_FitModel_Vars.py`
 - `src/test/py/tests/test_FitModel_TargetPts.py`
+- `src/test/py/tests/test_FitModel_TargetUW.py`
+- `src/test/py/tests/test_FitModel_Distance.py`
 
 ## Known nuances / gotchas
 
@@ -72,43 +83,37 @@ Tests:
 3) Target creation intentionally does NOT auto-search UW
 - Per `docs/FitModelAPI.md`, `AddFitModelTargetPt` only stores pt + initial UW/types; it does not call `SearchUW`.
 
-## What to do next (Slice 4)
+## What to do next (Slice 6)
 
-### Slice 4 APIs to implement
+### Slice 6 APIs to implement
 From `docs/FitModelAPI.md`:
-- `SearchFitModelTargetUW()`
-- `RefineFitModelTargetUW()`
+- `OptimizeFitModel()`
 
 Expected behavior:
-- wrappers should call:
-  - `FitModelMgr.SearchTargetUW()`
-  - `FitModelMgr.RefineTargetUW()`
-- should follow ErrorMgr patterns: validate preconditions, then `ErrorMgr.NoError()` on success.
+- wrapper should call `FitModelMgr.Optimize()`
+- add API-level precondition guards **before** allocation/`lmder1`:
+  - `GetNumFitModelTargetPts() > 0`
+  - at least 1 optimization DOF (fit var or free target U/W)
+  - residual dimension adequate: `3 * target_count >= opt_var_count`
+- return `lmder1` info code on success
+- follow ErrorMgr patterns: `ErrorMgr.NoError()` on success, meaningful error code on invalid input.
 
 Suggested tests to add:
-- Create a POD (or other supported geom)
-- Add at least 1 target point with arbitrary initial UW
-- Call `SearchFitModelTargetUW()`
-  - Assert no errors
-  - Optionally assert the stored UW changed (only if deterministic enough)
-- Call `RefineFitModelTargetUW()`
-  - Assert no errors
+- Build simple deterministic case with 1 geom (POD works):
+  - create target point from known surface coordinate via `CompPnt01` + offset
+  - set target UW fixed to keep problem stable
+  - add 1 fit variable (e.g. POD length)
+  - compute `before = UpdateFitModelDistance()`
+  - `info = OptimizeFitModel()`
+  - compute `after = UpdateFitModelDistance()`
+  - assert `after < before` (allow tolerance)
+- Add negative tests for precondition guards.
 
-(If UW changes are not deterministic/reliable across versions, just assert it runs, and maybe assert UW remains finite.)
+### Slice 7
+`SaveFitModel` / `LoadFitModel` wrappers.
 
-### Slice 5+
-Slice 5: `UpdateFitModelDistance` + `GetFitModelDistance`
-- Add empty-target guard in manager (`UpdateDist` division by zero) per proposal.
-
-Slice 6: `OptimizeFitModel`
-- Needs dimension/precondition guards before allocation + `lmder1` call.
-- Add a smoke test that distance decreases.
-
-Slice 7: save/load wrappers
-- Decide default `clear_existing=true` behavior.
-
-Slice 8: binding smoke tests
-- Minimal AngelScript script that calls new APIs.
+### Slice 8
+Binding smoke tests (AngelScript script calling new APIs).
 
 ## Quick verification commands
 
@@ -117,6 +122,6 @@ After implementing new slices:
 - `cd /home/luan/build/openvsp/vsp && cmake --build . -- -j2`
 
 2) run FitModel tests:
-- `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py -q`
+- `/home/luan/build/openvsp/vsp/venv/bin/pytest src/test/py/tests/test_FitModel_State.py src/test/py/tests/test_FitModel_Vars.py src/test/py/tests/test_FitModel_TargetPts.py src/test/py/tests/test_FitModel_TargetUW.py src/test/py/tests/test_FitModel_Distance.py -q`
 
-(Plus any new tests you add for slices 4+.)
+(Plus any new tests you add for slices 6+.)

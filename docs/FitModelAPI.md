@@ -43,8 +43,8 @@ Suggested slice order for TDD (live status):
 - [x] 1) state reset and clear operations
 - [x] 2) variable add/delete/get APIs
 - [x] 3) target add/delete/get/set APIs
-- [ ] 4) `SearchFitModelTargetUW` and `RefineFitModelTargetUW`
-- [ ] 5) `UpdateFitModelDistance` and `GetFitModelDistance`
+- [x] 4) `SearchFitModelTargetUW` and `RefineFitModelTargetUW`
+- [x] 5) `UpdateFitModelDistance` and `GetFitModelDistance`
 - [ ] 6) `OptimizeFitModel`
 - [ ] 7) save/load wrappers
 - [ ] 8) AngelScript/Python binding smoke tests

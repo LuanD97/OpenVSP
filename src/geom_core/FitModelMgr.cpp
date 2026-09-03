@@ -319,6 +319,7 @@ void FitModelMgrSingleton::Wype()
 {
     m_CurrVarIndex = int();
     m_WorkingParmID = string();
+    m_DistMetric = 0.0;
 
     DelAllVars();
 
@@ -817,6 +818,11 @@ void FitModelMgrSingleton::UpdateDist()
     int npt = m_TargetPts.size();
 
     m_DistMetric = 0;
+
+    if ( npt == 0 )
+    {
+        return;
+    }
 
     // Calculate target point distances
     for ( int i = 0 ; i < npt; i++ )

@@ -13262,6 +13262,25 @@ void RefineFitModelTargetUW()
     ErrorMgr.NoError();
 }
 
+double UpdateFitModelDistance()
+{
+    if ( FitModelMgr.GetNumTargetPt() <= 0 )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "UpdateFitModelDistance::No target points" );
+        return 0.0;
+    }
+
+    FitModelMgr.UpdateDist();
+    ErrorMgr.NoError();
+    return FitModelMgr.m_DistMetric;
+}
+
+double GetFitModelDistance()
+{
+    ErrorMgr.NoError();
+    return FitModelMgr.m_DistMetric;
+}
+
 bool AddFitModelVar( const std::string & parm_id )
 {
     Parm* parm_ptr = ParmMgr.FindParm( parm_id );
