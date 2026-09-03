@@ -3418,6 +3418,9 @@ void ScriptMgrSingleton::RegisterAdvLinkMgr( asIScriptEngine* se )
     r = se->RegisterGlobalFunction( "double GetFitModelDistance()", asFUNCTION( vsp::GetFitModelDistance ), asCALL_CDECL );
     assert( r >= 0 );
 
+    r = se->RegisterGlobalFunction( "int OptimizeFitModel()", asFUNCTION( vsp::OptimizeFitModel ), asCALL_CDECL );
+    assert( r >= 0 );
+
     r = se->RegisterGlobalFunction( "array<vec3d>@+ GetPtCloudPnts( const string & in geom_id )", asMETHOD( ScriptMgrSingleton, GetPtCloudPnts ), asCALL_THISCALL_ASGLOBAL, &ScriptMgr );
     assert( r >= 0 );
 

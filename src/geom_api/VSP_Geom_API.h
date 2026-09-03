@@ -39251,6 +39251,14 @@ extern double GetFitModelDistance();
     \ingroup Geom
 */
 /*!
+    Optimize current Fit Model problem and return the solver info code.
+*/
+extern int OptimizeFitModel();
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the points of a Point Cloud Geom
     \forcpponly
     \code{.cpp}

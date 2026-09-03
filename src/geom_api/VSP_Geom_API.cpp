@@ -13281,6 +13281,85 @@ double GetFitModelDistance()
     return FitModelMgr.m_DistMetric;
 }
 
+int OptimizeFitModel()
+{
+    int npt = FitModelMgr.GetNumTargetPt();
+    if ( npt <= 0 )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::No target points" );
+        return 0;
+    }
+
+    FitModelMgr.UpdateNumOptVars();
+    int nopt = FitModelMgr.GetNumOptVars();
+    if ( nopt <= 0 )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::No optimization variables" );
+        return 0;
+    }
+
+    if ( 3 * npt < nopt )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::Insufficient residual conditions for optimization variables" );
+        return 0;
+    }
+
+    std::vector< std::string > var_ids = FitModelMgr.GetVarVec();
+    for ( int i = 0; i < ( int )var_ids.size(); ++i )
+    {
+        Parm* parm_ptr = ParmMgr.FindParm( var_ids[i] );
+        if ( !parm_ptr )
+        {
+            ErrorMgr.AddError( VSP_INVALID_PTR, "OptimizeFitModel::Can't Find Parm " + var_ids[i] );
+            return 0;
+        }
+        if ( !parm_ptr->GetActiveFlag() )
+        {
+            ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::Inactive Parm " + var_ids[i] );
+            return 0;
+        }
+        if ( !std::isfinite( parm_ptr->Get() ) )
+        {
+            ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::Non-finite Parm value " + var_ids[i] );
+            return 0;
+        }
+    }
+
+    for ( int i = 0; i < npt; ++i )
+    {
+        TargetPt* tpt = FitModelMgr.GetTargetPt( i );
+        if ( !tpt )
+        {
+            ErrorMgr.AddError( VSP_INDEX_OUT_RANGE, "OptimizeFitModel::Target Index Out Of Range " + to_string( i ) );
+            return 0;
+        }
+
+        Geom* geom_ptr = FindGeomForOp( tpt->GetMatchGeom(), "OptimizeFitModel" );
+        if ( !geom_ptr )
+        {
+            return 0;
+        }
+
+        if ( !std::isfinite( tpt->GetPt().x() ) || !std::isfinite( tpt->GetPt().y() ) || !std::isfinite( tpt->GetPt().z() ) )
+        {
+            ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::Non-finite target point" );
+            return 0;
+        }
+
+        vec2d uw = tpt->GetUW();
+        if ( !std::isfinite( uw.x() ) || !std::isfinite( uw.y() ) )
+        {
+            ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "OptimizeFitModel::Non-finite target UW" );
+            return 0;
+        }
+    }
+
+    int info = FitModelMgr.Optimize();
+    FitModelMgr.UpdateDist();
+    ErrorMgr.NoError();
+    return info;
+}
+
 bool AddFitModelVar( const std::string & parm_id )
 {
     Parm* parm_ptr = ParmMgr.FindParm( parm_id );
