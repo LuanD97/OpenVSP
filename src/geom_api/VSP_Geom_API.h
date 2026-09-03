@@ -39219,6 +39219,22 @@ extern void SetFitModelTargetPt( int target_index, const vec3d & target_pt, cons
     \ingroup Geom
 */
 /*!
+    Search the target U/W coordinates for all Fit Model target points.
+*/
+extern void SearchFitModelTargetUW();
+
+/*!
+    \ingroup Geom
+*/
+/*!
+    Refine the target U/W coordinates for all Fit Model target points.
+*/
+extern void RefineFitModelTargetUW();
+
+/*!
+    \ingroup Geom
+*/
+/*!
     Get the points of a Point Cloud Geom
     \forcpponly
     \code{.cpp}

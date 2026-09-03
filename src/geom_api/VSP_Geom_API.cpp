@@ -13238,6 +13238,30 @@ void ClearFitModelTargetPts()
     ErrorMgr.NoError();
 }
 
+void SearchFitModelTargetUW()
+{
+    if ( FitModelMgr.GetNumTargetPt() <= 0 )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "SearchFitModelTargetUW::No target points" );
+        return;
+    }
+
+    FitModelMgr.SearchTargetUW();
+    ErrorMgr.NoError();
+}
+
+void RefineFitModelTargetUW()
+{
+    if ( FitModelMgr.GetNumTargetPt() <= 0 )
+    {
+        ErrorMgr.AddError( VSP_INVALID_INPUT_VAL, "RefineFitModelTargetUW::No target points" );
+        return;
+    }
+
+    FitModelMgr.RefineTargetUW();
+    ErrorMgr.NoError();
+}
+
 bool AddFitModelVar( const std::string & parm_id )
 {
     Parm* parm_ptr = ParmMgr.FindParm( parm_id );
