@@ -47,10 +47,13 @@ setup(
     description='OpenVSP Python Wrapper',
     # numpy is needed by the _vsp extension itself, which calls import_array() as it loads.
     # Without it the module fails at import with an unreported exception rather than anything
-    # that names numpy.
+    # that names numpy. _vsp is compiled against the numpy 1.x C-API/ABI, which a numpy 2.x
+    # runtime refuses to load at all (hard crash, not a warning) -- pin below 2 until _vsp is
+    # rebuilt against numpy>=2 headers (which are ABI-compatible with both 1.x and 2.x runtimes).
+    #
     # mcp 2.x renamed FastMCP to MCPServer and changed other APIs the mcp/ package here
     # relies on; pin to the 1.x line until that migration happens.
-    install_requires=['degen_geom', 'utilities', 'openvsp_config', 'numpy', 'mcp>=1.0,<2'],
+    install_requires=['degen_geom', 'utilities', 'openvsp_config', 'numpy<2', 'mcp>=1.0,<2'],
     entry_points={
         'console_scripts': [
             'openvsp-mcp=openvsp.mcp_server:main',
