@@ -18,16 +18,50 @@ from _mcp_test_utils import _make_fake_vsp, _load_full_server
 _MCP_DIR = pathlib.Path(__file__).parent.parent / "mcp"
 
 
+_FITMODEL_TOOL_NAMES = [
+    "import_point_cloud",
+    "get_point_cloud_summary",
+    "get_point_cloud_points",
+    "reset_fit_model",
+    "clear_fit_model_vars",
+    "clear_fit_model_targets",
+    "add_fit_model_vars",
+    "delete_fit_model_var",
+    "list_fit_model_vars",
+    "add_fit_model_targets",
+    "add_fit_model_targets_from_cloud",
+    "get_fit_model_target",
+    "list_fit_model_targets",
+    "update_fit_model_target",
+    "delete_fit_model_target",
+    "search_fit_model_target_uw",
+    "refine_fit_model_target_uw",
+    "update_fit_model_distance",
+    "get_fit_model_distance",
+    "optimize_fit_model",
+    "fit_model_to_convergence",
+    "save_fit_model",
+    "load_fit_model",
+]
+
+
 class TestMCPToolRegistration(unittest.TestCase):
     def test_all_tools_registered(self):
         fake_vsp = _make_fake_vsp()
         mcp_instance = _load_full_server(fake_vsp)
         tools = mcp_instance._tool_manager._tools
         tool_names = set(tools.keys())
-        self.assertGreaterEqual(len(tool_names), 185,
-            f"Expected at least 185 tools, got {len(tool_names)}: {sorted(tool_names)}")
+        self.assertGreaterEqual(len(tool_names), 208,
+            f"Expected at least 208 tools, got {len(tool_names)}: {sorted(tool_names)}")
         for name in ["get_vsp_version", "add_geom", "exec_analysis", "compute_fea_mesh"]:
             self.assertIn(name, tool_names, f"Tool '{name}' not registered")
+
+    def test_fitmodel_tools_registered(self):
+        fake_vsp = _make_fake_vsp()
+        mcp_instance = _load_full_server(fake_vsp)
+        tool_names = set(mcp_instance._tool_manager._tools.keys())
+        for name in _FITMODEL_TOOL_NAMES:
+            self.assertIn(name, tool_names, f"Fit Model tool '{name}' not registered")
 
     def tearDown(self):
         for key in list(sys.modules.keys()):

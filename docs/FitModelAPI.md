@@ -15,6 +15,13 @@ Initial planned API slices 1-8 are complete:
 
 Remaining items mentioned in this document are optional follow-up work unless explicitly re-scoped.
 
+**MCP tools**: the functions above are exposed as agent tools in
+`openvsp/mcp/_fitmodel.py` (point-cloud access plus the Fit Model workflow,
+including a `fit_model_to_convergence` loop). The agent-facing contract is at
+`specs/001-fitmodel-mcp-tools/contracts/mcp-tools.md`; engine gaps the tool
+layer works around (not fixed in C++) are listed in
+`specs/001-fitmodel-mcp-tools/research.md` R16.
+
 See also:
 
 - `docs/FitModelMGR.md` for how the existing optimizer works internally

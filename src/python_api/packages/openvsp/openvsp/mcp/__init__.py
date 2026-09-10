@@ -11,6 +11,7 @@ import argparse
 from openvsp.mcp import (  # noqa: F401
     _analysis,
     _fea,
+    _fitmodel,
     _geometry,
     _io,
     _misc,

@@ -14,6 +14,45 @@ _OPENVSP_DIR = pathlib.Path(__file__).parent.parent
 _MCP_DIR = _OPENVSP_DIR / "mcp"
 
 
+class _FakeErrorMgr:
+    """Stateful stand-in for ``vsp.ErrorMgrSingleton.getInstance()``.
+
+    Holds a list of ``(code, message)`` entries in push order (oldest first).
+    ``PopLastError`` mirrors the real API: it removes and returns the most
+    recently pushed entry (LIFO), as an object with ``GetErrorCode()`` /
+    ``GetErrorString()``.
+    """
+
+    class _Entry:
+        def __init__(self, code, message):
+            self._code = code
+            self._message = message
+
+        def GetErrorCode(self):
+            return self._code
+
+        def GetErrorString(self):
+            return self._message
+
+    def __init__(self):
+        self._errors = []
+        self.silenced = False
+
+    def GetNumTotalErrors(self):
+        return len(self._errors)
+
+    def PopLastError(self):
+        code, message = self._errors.pop()
+        return self._Entry(code, message)
+
+    def SilenceErrors(self):
+        self.silenced = True
+
+    def push(self, code, message):
+        """Test helper: queue an error as the engine would."""
+        self._errors.append((code, message))
+
+
 def _make_fake_vsp():
     """Return a MagicMock that mimics the openvsp module's public surface."""
     vsp = MagicMock(name="openvsp")
@@ -252,6 +291,28 @@ def _make_fake_vsp():
     vsp.GetResultsName = MagicMock(return_value="VSPAEROSweep")
     vsp.GetResultsType = MagicMock(return_value=1)
 
+    # Error queue (Fit Model tools capture this on every call)
+    vsp.ErrorMgrSingleton.getInstance.return_value = _FakeErrorMgr()
+
+    # Fit Model / point cloud constants and defaults, placed after the
+    # constant-setting loops above so nothing here overwrites them.
+    vsp.FIT_FIXED = 0
+    vsp.FIT_FREE = 1
+
+    vsp.ValidParm.return_value = True
+    vsp.GetFitModelVarIDs.return_value = ()
+    vsp.GetNumFitModelVars.return_value = 0
+    vsp.GetNumFitModelTargetPts.return_value = 0
+    vsp.AddFitModelVar.return_value = True
+    vsp.AddFitModelTargetPt.return_value = 0
+    vsp.UpdateFitModelDistance.return_value = 0.0
+    vsp.GetFitModelDistance.return_value = 0.0
+    vsp.OptimizeFitModel.return_value = 2
+    vsp.SaveFitModel.return_value = True
+    vsp.LoadFitModel.return_value = 0
+    vsp.GetParmGroupName.return_value = "Design"
+    vsp.GetPtCloudPnts.return_value = ()
+
     return vsp
 
 
@@ -338,6 +399,7 @@ def _load_full_server(fake_vsp):
         "_transforms",
         "_surface",
         "_fea",
+        "_fitmodel",
         "_misc",
     ]
     for name in submodules:

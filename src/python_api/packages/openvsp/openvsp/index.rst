@@ -48,6 +48,9 @@ The server exposes tools for:
 - Exporting models to STL, OBJ, STEP, IGES, DXF, GMSH, PLOT3D, Cart3D, and other formats
 - Importing geometry from STL, BEM, and legacy OpenVSP v2 files
 - Computing watertight (CompGeom), degenerate (DegenGeom), and CFD surface meshes
+- Importing point clouds and inspecting them in bounded pages
+- Fitting model parameters to point cloud targets with Fit Model, including a
+  fit-to-convergence tool
 
 The package registers an ``openvsp-mcp`` console script entry point so that the server can also be
 launched as::
